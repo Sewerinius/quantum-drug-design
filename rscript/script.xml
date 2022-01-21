@@ -1,0 +1,59 @@
+<ROSETTASCRIPTS>
+    <SCOREFXNS>
+    </SCOREFXNS>
+    <RESIDUE_SELECTORS>
+        <Layer name="select_core"     select_core="true"  select_boundary="false" select_surface="false" use_sidechain_neighbors="true" ball_radius="4" core_cutoff="1.5" surface_cutoff="0.75" />
+		<Layer name="select_boundary" select_core="false" select_boundary="true"  select_surface="false" use_sidechain_neighbors="true" ball_radius="4" core_cutoff="1.5" surface_cutoff="0.75" />
+		<Layer name="select_surf"     select_core="false" select_boundary="false" select_surface="true"  use_sidechain_neighbors="true" ball_radius="4" core_cutoff="1.5" surface_cutoff="0.75" />
+
+		<Not name="select_not_core"     selector="select_core"     />
+		<Not name="select_not_boundary" selector="select_boundary" />
+		<Not name="select_not_surf"     selector="select_surf"     />
+
+		<Phi name="select_pos_phi" select_positive_phi="true" />
+		<Not name="select_neg_phi" selector="select_pos_phi" />
+
+		<And name="select_pos_phi_core"     selectors="select_pos_phi,select_core"     />
+		<And name="select_pos_phi_boundary" selectors="select_pos_phi,select_boundary" />
+		<And name="select_pos_phi_surf"     selectors="select_pos_phi,select_surf"     />
+		<And name="select_neg_phi_core"     selectors="select_neg_phi,select_core"     />
+		<And name="select_neg_phi_boundary" selectors="select_neg_phi,select_boundary" />
+		<And name="select_neg_phi_surf"     selectors="select_neg_phi,select_surf"     />
+    </RESIDUE_SELECTORS>
+    <PACKER_PALETTES>
+
+		<CustomBaseTypePackerPalette name="also_d_aa_and_ncaa_palette" additional_residue_types="DALA,DCYS,DASP,DGLU,DPHE,DHIS,DILE,DLYS,DLEU,DMET,DASN,DPRO,DGLN,DARG,DSER,DTHR,DVAL,DTRP,DTYR,DAB,DDAB" />
+    </PACKER_PALETTES>
+    <TASKOPERATIONS>
+        <ExtraRotamersGeneric name="extra_rot" ex1="false" ex2="false" extrachi_cutoff="0" />
+		<LimitAromaChi2 name="limit_aro_chi2" />
+		<ReadResfile name="l_design_core"     filename="rscript/test/inputs/resfile_L_core.txt"     selector="select_neg_phi_core"     />
+		<ReadResfile name="l_design_boundary" filename="rscript/test/inputs/resfile_L_boundary.txt" selector="select_neg_phi_boundary" />
+		<ReadResfile name="l_design_surf"     filename="rscript/test/inputs/resfile_L_surface.txt"  selector="select_neg_phi_surf"     />
+		<ReadResfile name="d_design_core"     filename="rscript/test/inputs/resfile_D_core.txt"     selector="select_pos_phi_core"     />
+		<ReadResfile name="d_design_boundary" filename="rscript/test/inputs/resfile_D_boundary.txt" selector="select_pos_phi_boundary" />
+		<ReadResfile name="d_design_surf"     filename="rscript/test/inputs/resfile_D_surface.txt"  selector="select_pos_phi_surf"     />
+    </TASKOPERATIONS>
+    <MOVE_MAP_FACTORIES>
+    </MOVE_MAP_FACTORIES>
+    <SIMPLE_METRICS>
+<!--        <InteractionGraphSummaryMetric name="int_graph_summary" filename="out.txt"/>-->
+        <InteractionGraphSummaryMetric name="int_graph_summary" packer_palette="also_d_aa_and_ncaa_palette" task_operations="extra_rot,limit_aro_chi2,l_design_core,l_design_boundary,l_design_surf,d_design_core,d_design_boundary,d_design_surf" filename="out.txt"/>
+    </SIMPLE_METRICS>
+    <FILTERS>
+    </FILTERS>
+    <MOVERS>
+        <DeclareBond name="connect_ends" atom1="C" atom2="N" res1="32" res2="1" />
+		<DeclareBond name="connect_ends2" atom1="C" atom2="N" res1="16" res2="17" />
+        <RunSimpleMetrics name="qpacker_metric" metrics="int_graph_summary" prefix="qpacker_" />
+    </MOVERS>
+    <PROTOCOLS>
+        <Add mover="connect_ends" />
+		<Add mover="connect_ends2" />
+
+        <Add mover="qpacker_metric" />
+    </PROTOCOLS>
+    <OUTPUT/>
+</ROSETTASCRIPTS>
+
+
